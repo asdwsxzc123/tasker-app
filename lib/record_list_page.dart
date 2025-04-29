@@ -24,8 +24,8 @@ class _RecordListPageState extends State<RecordListPage> {
     ),
   ];
   final _formKey = GlobalKey<FormState>();
-  final _amountController = TextEditingController();
-  final _categoryController = TextEditingController();
+  final _amountController = TextEditingController(text:1.0.toString());
+  final _categoryController = TextEditingController( text:'午餐');
   final _dayController = TextEditingController(text: '1');
   int _type = 0;
 
@@ -35,8 +35,10 @@ class _RecordListPageState extends State<RecordListPage> {
   @override
   void initState() {
     super.initState();
+    print("init");
     // 只做初始化工作，不涉及 context
     _records.forEach((record) {
+      print(record);
       _scheduleMonthlyRecord(record, showSnackbar: false);
     });
   }
@@ -72,6 +74,7 @@ class _RecordListPageState extends State<RecordListPage> {
 
   // 发送单个记录
   Future<void> _sendRecord(QianJiRecord record) async {
+    print(record.schemeUri);
     try {
       await launchUrl(record.schemeUri, mode: LaunchMode.externalApplication);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -103,22 +106,25 @@ class _RecordListPageState extends State<RecordListPage> {
   // 设置每月定时任务
   void _scheduleMonthlyRecord(QianJiRecord record, {bool showSnackbar = true}) {
   // 测试用：设置为当前时间+10分钟
-  final initialDelay = Duration(minutes: 1);
+  final initialDelay = Duration(seconds: 10);
 
   // 正式用：计算实际每月执行时间（保留但暂时不使用）
   // final initialDelay = _calculateInitialDelay(record.scheduledDay);
 
   Workmanager().registerOneOffTask(
-    'qianji_${record.hashCode}', // 唯一任务ID
+    'qianji_foreground_task',
+    // 'qianji_${record.hashCode}', // 唯一任务ID
     'monthly_qianji_task',
     initialDelay: initialDelay, // 使用测试延迟时间
     inputData: record.toJson(),
-    constraints: Constraints(
-      networkType: NetworkType.not_required,
-      requiresBatteryNotLow: false,
-      requiresCharging: false,
-      requiresDeviceIdle: false,
-    ),
+    // constraints: Constraints(
+    //   networkType: NetworkType.not_required,
+    //   requiresBatteryNotLow: false,
+    //   requiresCharging: false,
+    //   requiresDeviceIdle: false,
+    // ),
+    constraints: Constraints(networkType: NetworkType.not_required),
+    existingWorkPolicy: ExistingWorkPolicy.replace,
     backoffPolicy: BackoffPolicy.linear,
     backoffPolicyDelay: Duration(minutes: 30),
   );
@@ -144,7 +150,7 @@ class _RecordListPageState extends State<RecordListPage> {
       _amountController.clear();
       _categoryController.clear();
     });
-
+    print(record);
     _scheduleMonthlyRecord(record);
   }
 

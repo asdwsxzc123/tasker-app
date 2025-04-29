@@ -9,7 +9,8 @@ class QianJiRecord {
     required this.amount,
     required this.category,
     required this.scheduledDay,
-  });
+  });  @override
+  String toString() => 'Print------QianJiRecord(type: $type, amount: $amount)';
 
   // 生成钱迹URL Scheme
   Uri get schemeUri => Uri(
